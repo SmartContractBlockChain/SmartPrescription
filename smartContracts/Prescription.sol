@@ -8,11 +8,21 @@ contract Prescription {
     // the state variable from outside of the contract.
     address public creator;
 
-    // for now lets say we will store only medicine name,
-    // but this should be some struct - https://docs.soliditylang.org/en/v0.8.1/types.html#structs
-    string public medicineName;
+     struct Drug{
+        string _name;
+        string _strength;
+        string _formulation;
+    }
 
-    // lets say patient address is not accessible for others
+    struct Prescription {
+        address patient_address; // Can have all necessary information about patient from his address
+        Drug drug;
+        string directions;
+        string quantity; //No Floats in solidity, should we switch to int ?
+        address signature; //Can be used to find name and address of prescriber
+        string date;
+    }
+
     address patient;
 
     // lets assume pharmacist will be visible as well
@@ -21,24 +31,27 @@ contract Prescription {
     // to indicate wheather prescription was used
     bool public isUsed;
 
-    constructor(string memory _medicine_name,address _patient) {
-        creator = msg.sender;
-        medicineName=_medicine_name;
-        patient=_patient;
+    constructor(address _patient_address, string memory _directions, string memory _quantity, string memory _date, string memory _name, string memory _strength, string memory _formulation) {
+        creator = msg.sender; // TODO: Make a check that the construction of the prescription can only be done by a doctor with a require from a database of doctors address?
+        Drug memory drug = Drug(_name, _strength, _formulation);
+        Prescription memory prescription = Prescription(_patient_address, drug, _directions, _quantity, creator, _date);
+        patient=_patient_address;
         isUsed=false;
+        
         // here we wont initialize address of pharmacist,
         // as it can be only done when patient will be going to use its prescription
     }
 
-
-    // update after meeting - calling this function need to be done by pharmacist
-    //so please go ahead and modify this function
-    function reedem(address _pharmacist) public{
-        // here we should add more validation to avoid calling this method more than one,
-        // sth like require(isUsed=false) plus only the pharmacist should call it so require(msg.sender=pharmacist)
-        // should be added
-
+    function setPharmacist(address _pharmacist) public {
+        //Should set pharmacist before patient can retrieve his prescription
         pharmacist = _pharmacist;
+    }
+    
+
+    function reedem(address _patient) public{
+        // here we should add more validation to avoid calling this method more than once, anyway to delete the contract once done ?
+        require(msg.sender == pharmacist && isUsed==false);
         isUsed = true;
+        //Also need to display the prescription here when redeeming so pharmacist can atctually do it ^^
     }
 }
