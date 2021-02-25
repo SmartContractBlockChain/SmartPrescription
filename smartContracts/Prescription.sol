@@ -43,7 +43,8 @@ contract Prescription {
     }
 
     function setPharmacist(address _pharmacist) public {
-        //Should set pharmacist before patient can retrieve his prescription
+        //Should set pharmacist before patient can retrieve his prescription, done by patient
+        require(msg.sender == patient) //this way no one else than the patient can retrieve the prescription
         pharmacist = _pharmacist;
     }
     
@@ -52,6 +53,6 @@ contract Prescription {
         // here we should add more validation to avoid calling this method more than once, anyway to delete the contract once done ?
         require(msg.sender == pharmacist && isUsed==false);
         isUsed = true;
-        //Also need to display the prescription here when redeeming so pharmacist can atctually do it ^^
+        //TODO: need to display the prescription here when redeeming so pharmacist can atctually do it 
     }
 }
