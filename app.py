@@ -23,6 +23,8 @@ def create_app(test_config=None):
   Retrieve drugs list 
     * name 
     * availability (optional) 
+
+  Authorized users (Doctor and Pharmacist)
   '''
   @app.route('/drugs')
   def get_drugs_list():
@@ -39,6 +41,8 @@ def create_app(test_config=None):
     * strength
     * formulation
     * availability (optional) 
+    
+  Authorized users (Doctor and Pharmacist)
   '''
   @app.route('/drugs/<string:drug_name>')
   def get_drug_by_name(drug_name):
@@ -57,6 +61,8 @@ def create_app(test_config=None):
     * signature  (name and address of prescriber)
     * date of issue 
     * isUsed (boolean) 
+    
+  Authorized users (Doctor and Pharmacist)
   '''
   @app.route('/prescription/<string:patient_address>')
   def get_prescription(patient_address):
@@ -72,6 +78,8 @@ def create_app(test_config=None):
   Retrieve prescriber infromation by the signature
     * prescriber name
     * address
+    
+  Authorized users (Doctor and Pharmacist)
   '''
   @app.route('/prescription/<string:signature>')
   def get_prescriber(signature):
@@ -91,6 +99,8 @@ def create_app(test_config=None):
         - directions
         - quantity
     * date of issue
+    
+  Authorized user (Doctor)
   '''
   @app.route('/prescription', methods=['POST'])
   def create_prescription():
@@ -108,6 +118,8 @@ def create_app(test_config=None):
     * check isUsed
         - if true --> reject the request
         - if false --> 1) accsept the request and 2) set isUsed to true
+        
+  Authorized users (Pharmacist)
 
     NOTE: check of the varibale in the request to use wither patient_address or pharmacist_address
   '''
