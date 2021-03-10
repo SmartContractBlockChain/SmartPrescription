@@ -21,10 +21,10 @@ contract Prescription {
     // to indicate wheather prescription was used
     bool public isUsed;
 
-    constructor(string memory _medicine_name,address _patient) {
+    constructor() {
         creator = msg.sender;
-        medicineName=_medicine_name;
-        patient=_patient;
+        medicineName='_medicine_name';
+//        patient=_patient;
         isUsed=false;
         // here we wont initialize address of pharmacist,
         // as it can be only done when patient will be going to use its prescription
