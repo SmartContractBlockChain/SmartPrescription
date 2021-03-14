@@ -23,7 +23,7 @@ contract Prescription {
 
     constructor() {
         creator = msg.sender;
-        medicineName='_medicine_name';
+        medicineName='dupa';
 //        patient=_patient;
         isUsed=false;
         // here we wont initialize address of pharmacist,
