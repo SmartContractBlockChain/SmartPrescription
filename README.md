@@ -28,3 +28,33 @@ To do it by command line:
 ```
 python ganache_integration.py
 ```
+
+____
+### DB integration
+
+1 install mysql (https://www.mysql.com/downloads/)
+
+2 login to mysql console 
+```
+sudo mysql -u root -p
+```
+3 create db user
+```
+CREATE USER 'SCBC'@'localhost' IDENTIFIED BY 'SCBC_PASS';
+```
+4 create db
+```
+CREATE DATABASE smartPrescription;
+```
+5 grant privilages
+```
+GRANT ALL PRIVILEGES ON smartPrescription.* TO 'SCBC'@'localhost';
+```
+6 install mysql connector
+```
+conda install -c anaconda mysql-connector-python 
+```
+7 run flask
+```
+python db_integration.py
+```
