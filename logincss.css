@@ -1,0 +1,79 @@
+#background{
+    background: linear-gradient(to bottom, rgba(250,250,251,0), rgba(255,255,255,1)), url("backtwo.jpg");
+    /*!*background-image: linear-gradient(to bottom, #0b0202, #403c3d, #7a7879, #bab9ba, #ffffff);*!*/
+    background-size: 100%;
+
+}
+
+#butgoback{
+    padding: 20px;
+}
+
+#but1{
+    width: 125px;
+}
+
+#contrue{
+    /*padding-top: 7.5%;*/
+    padding-bottom: 50%;
+}
+
+.box {
+    width: 100%;
+    padding: 50px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: #276abc;
+    text-align: center;
+    border-radius: 15px;
+    /*margin-top: 150px;*/
+}
+
+#footer {
+    padding: 20px;
+}
+
+.box input[type="text"],
+.box input[type="password"] {
+    border: 0;
+    background: white;
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+    border: 3px solid #3498db;
+    padding: 10px 10px;
+    width: 300px;
+    outline: none;
+    color: #0e0909;
+    border-radius: 24px;
+}
+
+.box input[type="text"]:focus,
+.box input[type="password"]:focus {
+    width: 350px;
+    border-color: #2ecc71
+}
+
+.box input[type="submit"] {
+    border: 0;
+    background: #2ecc71;
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+    border: 2px solid #2ecc71;
+    padding: 14px 40px;
+    outline: none;
+    color: white;
+    width: 200px;
+    border-radius: 24px;
+    transition: 0.25s;
+    cursor: pointer
+}
+
+.box input[type="submit"]:hover {
+    background: #9de0b3
+}
+
+
+
