@@ -31,7 +31,7 @@ if __name__ == '__main__':
     contract_source_path = 'contracts/Prescription.sol'
     contract_interface = compile_source_contract(contract_source_path)
 
-    # obtain address of deployed contract
+    # deploy and obtain address of contract
     address = deploy_contract(w3, contract_interface, w3.eth.accounts[0], 'viagra', w3.eth.accounts[1])
 
     # interact with contract from blockchain
