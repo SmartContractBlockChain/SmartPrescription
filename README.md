@@ -54,7 +54,11 @@ GRANT ALL PRIVILEGES ON smartPrescription.* TO 'SCBC'@'localhost';
 ```
 conda install -c anaconda mysql-connector-python 
 ```
-7 run flask
+
+7 run db_script.sql in IDE or in mysql console 
+
+8 run flask
 ```
 python db_integration.py
 ```
+9 go to http://127.0.0.1:5000/ and see if you obtain data from db
