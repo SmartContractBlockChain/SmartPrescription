@@ -9,9 +9,9 @@ contract Prescription {
     address public creator;
 
      struct Drug{
-        string _name;
-        string _strength;
-        string _formulation;
+        string name;
+        string strength;
+        string formulation;
     }
 
     struct Prescription {
