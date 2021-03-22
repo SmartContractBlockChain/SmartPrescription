@@ -13,10 +13,10 @@ contract smartPrescription {
     }
 
     struct Prescription {
-        address patient_address; // Can have all necessary information about patient from his address
+        address patient_address; // Unique to a patient
         Drug drug;
         string directions;
-        string quantity; //No Floats in solidity, should we switch to int ?
+        string quantity; //No Floats in solidity, as drugs can have decimal points, use string
         address signature; //Can be used to find name and address of prescriber
         string date;
     }
@@ -32,6 +32,8 @@ contract smartPrescription {
 
     // to indicate wheather prescription was used
     bool public isUsed;
+
+    bool patientSignature;
 
     constructor(
         address _patient_address,
@@ -54,15 +56,13 @@ contract smartPrescription {
         );
         patient = _patient_address;
         isUsed = false;
-
-        // here we wont initialize address of pharmacist,
-        // as it can be only done when patient will be going to use its prescription
+        patientSignature = false;
     }
 
-    function setPharmacist(address _pharmacist) public {
-        //Should set pharmacist before patient can retrieve his prescription, done by patient
-        //this way no one else than the patient can retrieve the prescription
-        pharmacist = _pharmacist;
+    function patientSign() public returns (bool) {
+        require(patientSignature == false && msg.sender == patient);
+        patientSignature = true;
+        return patientSignature;
     }
 
     function getPrescription()
@@ -76,6 +76,7 @@ contract smartPrescription {
             string memory,
             string memory,
             string memory,
+            bool,
             bool
         )
     {
@@ -87,12 +88,15 @@ contract smartPrescription {
             drug.name,
             drug.strength,
             drug.formulation,
-            isUsed
+            isUsed,
+            patientSignature
         );
     }
 
     function redeem() public returns (bool) {
-        require(isUsed == false);
+        // Possible to request the double signing from patient and pharmacist (doctor could assign the pharmacist at creation)
+        // Possible also to request the signing of only the patient
+        require(isUsed == false && patientSignature == true);
         isUsed = true;
         return (isUsed);
     }
