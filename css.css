@@ -1,6 +1,5 @@
 #background{
     background: linear-gradient(to bottom, rgba(250,250,251,0), rgba(255,255,255,1)), url("backtwo.jpg");
-    /*!*background-image: linear-gradient(to bottom, #0b0202, #403c3d, #7a7879, #bab9ba, #ffffff);*!*/
     background-size: 100%;
 
 }
@@ -15,17 +14,6 @@
     padding: 30px;
 }
 
-/*.box {*/
-/*    width: 60%;*/
-/*    padding: 20px;*/
-/*    !*position: absolute;*!*/
-/*    top: 50%;*/
-/*    left: 50%;*/
-/*    background: rgba(250,250,251,1);*/
-/*    text-align: center;*/
-/*    border-radius: 15px;*/
-/*    !*margin-top: 150px;*!*/
-/*}*/
 
 .btn {
     border-radius: 15px;

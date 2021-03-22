@@ -55,7 +55,7 @@
     border-color: #2ecc71
 }
 
-.box input[type="submit"] {
+.box button[type="button"] {
     border: 0;
     background: #2ecc71;
     display: block;
