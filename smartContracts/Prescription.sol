@@ -1,7 +1,6 @@
 pragma solidity >=0.7.0;
 
 contract smartPrescription {
-    // usually prescription is made by doctor, but here we will stick to general term of prescription creator
     // The keyword public automatically generates a function that allows you to access the current value of
     // the state variable from outside of the contract.
     address public creator;
@@ -17,7 +16,7 @@ contract smartPrescription {
         Drug drug;
         string directions;
         string quantity; //No Floats in solidity, as drugs can have decimal points, use string
-        address signature; //Can be used to find name and address of prescriber
+        address signature; // Address of the creator of the prescription i.e a doctor
         string date;
     }
 
@@ -25,18 +24,17 @@ contract smartPrescription {
 
     Drug drug;
 
-    address patient;
-
     // lets assume pharmacist will be visible as well
     address public pharmacist;
 
     // to indicate wheather prescription was used
     bool public isUsed;
 
-    bool patientSignature;
+    bool public patientSignature;
 
     constructor(
         address _patient_address,
+        address _pharmacist_address,
         string memory _directions,
         string memory _quantity,
         string memory _date,
@@ -54,13 +52,16 @@ contract smartPrescription {
             creator,
             _date
         );
-        patient = _patient_address;
+        pharmacist = _pharmacist_address;
         isUsed = false;
         patientSignature = false;
     }
 
     function patientSign() public returns (bool) {
-        require(patientSignature == false && msg.sender == patient);
+        require(
+            patientSignature == false &&
+                msg.sender == prescription.patient_address
+        );
         patientSignature = true;
         return patientSignature;
     }
@@ -69,6 +70,7 @@ contract smartPrescription {
         public
         view
         returns (
+            address,
             address,
             string memory,
             string memory,
@@ -80,8 +82,14 @@ contract smartPrescription {
             bool
         )
     {
+        require(
+            msg.sender == pharmacist ||
+                msg.sender == prescription.patient_address ||
+                msg.sender == creator
+        );
         return (
             prescription.patient_address,
+            pharmacist,
             prescription.directions,
             prescription.quantity,
             prescription.date,
@@ -94,10 +102,13 @@ contract smartPrescription {
     }
 
     function redeem() public returns (bool) {
-        // Possible to request the double signing from patient and pharmacist (doctor could assign the pharmacist at creation)
-        // Possible also to request the signing of only the patient
-        require(isUsed == false && patientSignature == true);
+        require(
+            isUsed == false &&
+                patientSignature == true &&
+                msg.sender == pharmacist
+        );
         isUsed = true;
         return (isUsed);
     }
 }
+// TODO: Create a function to add a drug to the prescription

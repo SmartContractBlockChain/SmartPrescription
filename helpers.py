@@ -1,11 +1,9 @@
-from web3 import Web3, HTTPProvider
 from solcx import compile_source
 
 
 def compile_source_contract(contract_file_path):
     with open(contract_file_path, "r") as f:
         source = f.read()
-
     contract_id, contract_interface = compile_source(source).popitem()
     return contract_interface
 
@@ -27,8 +25,8 @@ def deploy_contract(w3, contract_interface, from_account, contractsVariables):
             contractsVariables[4],
             contractsVariables[5],
             contractsVariables[6],
+            contractsVariables[7],
         )
         .transact({"from": from_account})
     )
-
     return w3.eth.getTransactionReceipt(tx_hash)["contractAddress"]

@@ -1,9 +1,6 @@
-import os
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-import random
 from web3 import Web3, HTTPProvider
-from solcx import compile_source
 from helpers import compile_source_contract, get_contract, deploy_contract
 
 
@@ -101,7 +98,6 @@ def create_app(test_config=None):
         creator = (
             get_contract(w3, contract_interface, address).functions.creator().call()
         )
-
         return jsonify({"success": True, "creator": creator}), 200
 
     """
@@ -129,6 +125,7 @@ def create_app(test_config=None):
         from_account = request_data["creatorAddress"]
         _contractVariables = [
             request_data["patientAddress"],
+            request_data["pharmacistAddress"],
             request_data["directions"],
             request_data["quantity"],
             request_data["date"],
@@ -163,8 +160,16 @@ def create_app(test_config=None):
 
     @app.route("/redeem/<string:address>", methods=["POST"])
     def redeem_prescription(address):
-        isUsed = get_contract(w3, contract_interface, address).functions.redeem().call()
-        return jsonify({"success": True, "Prescription used": isUsed}), 200
+        request_data = request.get_json()
+        tx_hash = (
+            get_contract(w3, contract_interface, address)
+            .functions.redeem()
+            .transact({"from": request_data["pharmacistAddress"]})
+        )
+        status = w3.eth.getTransactionReceipt(tx_hash)[
+            "status"
+        ]  # TODO: check status and return different if transaction is False
+        return jsonify({"success": True, "PrescriptionUsed": status}), 200
 
     """
     POST requests for redeem prescription
@@ -183,12 +188,13 @@ def create_app(test_config=None):
         request_data = request.get_json()
         patient_address = request_data["patientAddress"]
         address = request_data["contractAddress"]
-        isSigned = (
+        tx_hash = (
             get_contract(w3, contract_interface, address)
             .functions.patientSign()
-            .call({"from": patient_address})
+            .transact({"from": patient_address})
         )
-        return jsonify({"success": True, "patientSigned": isSigned}), 200
+        status = w3.eth.getTransactionReceipt(tx_hash)["status"]
+        return jsonify({"success": True, "patientSigned": status}), 200
 
     @app.errorhandler(404)
     def not_found(error):
