@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link rel="stylesheet" href="doctorcss.css">
+
+    <title>patient</title>
+</head>
+<body id="background">
+<!--TOP NAVBAR-->
+<nav class="navbar navbar-light bg-light">
+    <span class="navbar-brand mb-0 h1">E-prescriber</span>
+</nav>
+
+<div class="mt-5">
+</div>
+
+<div id="butgoback">
+    <button id="but1" type="button" class="btn btn-light" onclick="document.location='pharmacist.html'">Go back</button>
+</div>
+
+<!--<div class="container" id="contrue">-->
+<!--    <div class="row">-->
+<!--        <div class="col-md-6">-->
+<!--            <form class="box">-->
+<!--                <h3 style="color: white"><strong>Place for showing the prescription</strong></h3>-->
+
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--  Authorized users (Doctor and Pharmacist)-->
+<!--  '''-->
+<!--  @app.route('/drugs/<string:drug_name>')-->
+<!--      def get_drug_by_name(drug_name):-->
+
+<!--      return jsonify({-->
+<!--      'success': True,-->
+<!--      }),200-->
+
+<!--      '''-->
+<!--      GET requests for prescription.-->
+
+<!--      Retrieve prescription details by patient_address-->
+<!--      * drug name-->
+<!--      * directions-->
+<!--      * quantity-->
+<!--      * signature  (name and address of prescriber)-->
+<!--      * date of issue-->
+<!--      * isUsed (boolean)-->
+
+
+<div class="container">
+    <!--        PREVIOUS PRESCRIPTION TABLE-->
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Strength</th>
+            <th scope="col">Formulation</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Date</th>
+            <th scope="col">Signature</th>
+            <th scope="col">Retrived</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Paracetamol</td>
+            <td>500mg</td>
+            <td>Paracetamolum</td>
+            <td>100 caplets</td>
+            <td>23 Mar 2021</td>
+            <td>Marciniak</td>
+            <td></td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Levothyroxine</td>
+            <td>100mcg</td>
+            <td>Levothyroxine sodium</td>
+            <td>28 caplets</td>
+            <td>11 Feb 2021</td>
+            <td>Marciniak</td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<!--BOTTOM NAVBAR-->
+<nav id="footer" class="navbar navbar-expand-sm bg-light justify-content-center fixed-bottom">
+    <p><small>Powered by <strong>SCBC</strong></small></p>
+</nav>
