@@ -102,10 +102,12 @@ def create_app(test_config=None):
             get_contract(w3, contract_interface, address).functions.creator().call()
         )
 
-        return jsonify({"success": True, "Prescriber": creator}), 200
+        return jsonify({"success": True, "creator": creator}), 200
 
     """
     POST requests for creating prescription.
+
+    * creator eth address 
 
     create prescription
     * patient_address
@@ -124,6 +126,7 @@ def create_app(test_config=None):
     @app.route("/prescription", methods=["POST"])
     def create_prescription():
         request_data = request.get_json()
+        from_account = request_data["creatorAddress"]
         _contractVariables = [
             request_data["patientAddress"],
             request_data["directions"],
@@ -134,9 +137,14 @@ def create_app(test_config=None):
             request_data["drugFormulation"],
         ]
         address = deploy_contract(
-            w3, contract_interface, w3.eth.accounts[0], _contractVariables
+            w3, contract_interface, from_account, _contractVariables
         )
-        return jsonify({"success": True, "contractAddress": address}), 200
+        return (
+            jsonify(
+                {"success": True, "contractAddress": address, "creator": from_account}
+            ),
+            200,
+        )
 
     """
     POST requests for redeem prescription.
@@ -159,25 +167,28 @@ def create_app(test_config=None):
         return jsonify({"success": True, "Prescription used": isUsed}), 200
 
     """
-    POST requests for redeem prescription.
+    POST requests for redeem prescription
 
-    Redeem prescription
-    * patient_address
-    * setPharmacist
-    * check isUsed
+    Patient sign the prescription:
+    * pass the address of the patient in JSON POST request
+    * The call of the function is made from patient address 
+
+    - RETURN: the status of the signature of the patient 
         
     Authorized users (Patient)
     """
 
-    @app.route("/sign/<string:address>")
-    def patient_sign(address):
-        patient_address = request.args.get("patient", None)
+    @app.route("/sign", methods=["POST"])
+    def patient_sign():
+        request_data = request.get_json()
+        patient_address = request_data["patientAddress"]
+        address = request_data["contractAddress"]
         isSigned = (
             get_contract(w3, contract_interface, address)
             .functions.patientSign()
             .call({"from": patient_address})
         )
-        return jsonify({"success": True, "Patient signed": isSigned}), 200
+        return jsonify({"success": True, "patientSigned": isSigned}), 200
 
     @app.errorhandler(404)
     def not_found(error):
