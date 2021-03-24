@@ -1,9 +1,6 @@
 pragma solidity >=0.7.0;
 
 contract smartPrescription {
-    // The keyword public automatically generates a function that allows you to access the current value of
-    // the state variable from outside of the contract.
-    address public creator;
 
     struct Drug {
         string name;
@@ -11,30 +8,34 @@ contract smartPrescription {
         string formulation;
     }
 
-    struct Prescription {
-        address patient_address; // Unique to a patient
-        Drug drug;
-        string directions;
-        string quantity; //No Floats in solidity, as drugs can have decimal points, use string
-        address signature; // Address of the creator of the prescription i.e a doctor
-        string date;
-    }
-
-    Prescription prescription;
-
+     // address of doctor
+    address public creator;
+    address patient_address;
     Drug drug;
+    string directions;
+    string quantity;
+    string date;
 
-    // lets assume pharmacist will be visible as well
-    address public pharmacist;
+    //all pharmacist where patient can reedem the prescription
+    address[] public pharmacists;
 
-    // to indicate wheather prescription was used
     bool public isUsed;
 
-    bool public patientSignature;
+    bool public isPatientSigned;
+    // address of pharmacist where patient can redeemed the prescription
+    address prescriptionRedeemedAt;
+
+    mapping (address => bool) private pharmacist_address_map;
+
+    function setPharmacists(address[] memory _pharmacists_address) private{
+        for (uint i = 0; i < _pharmacists_address.length; i++) {
+            pharmacist_address_map[_pharmacists_address[i]]=true;
+        }
+    }
 
     constructor(
         address _patient_address,
-        address _pharmacist_address,
+        address[] memory _pharmacists_address,
         string memory _directions,
         string memory _quantity,
         string memory _date,
@@ -44,26 +45,20 @@ contract smartPrescription {
     ) {
         creator = msg.sender;
         drug = Drug(_name, _strength, _formulation);
-        prescription = Prescription(
-            _patient_address,
-            drug,
-            _directions,
-            _quantity,
-            creator,
-            _date
-        );
-        pharmacist = _pharmacist_address;
+        patient_address = _patient_address;
+        directions = _directions;
+        quantity = _quantity;
+        date = _date;
+        setPharmacists(_pharmacists_address);
         isUsed = false;
-        patientSignature = false;
+        isPatientSigned = false;
     }
 
-    function patientSign() public returns (bool) {
-        require(
-            patientSignature == false &&
-                msg.sender == prescription.patient_address
-        );
-        patientSignature = true;
-        return patientSignature;
+    function patientSign(address _pharmacist) public returns (bool) {
+        require(!isPatientSigned && msg.sender == patient_address);
+        isPatientSigned = true;
+
+        return isPatientSigned;
     }
 
     function getPrescription()
@@ -71,7 +66,7 @@ contract smartPrescription {
         view
         returns (
             address,
-            address,
+            address[] memory,
             string memory,
             string memory,
             string memory,
@@ -79,36 +74,32 @@ contract smartPrescription {
             string memory,
             string memory,
             bool,
-            bool
-        )
-    {
-        require(
-            msg.sender == pharmacist ||
-                msg.sender == prescription.patient_address ||
-                msg.sender == creator
+            bool) {
+        require(pharmacist_address_map[msg.sender]
+            || msg.sender == patient_address
+            || msg.sender == creator
         );
         return (
-            prescription.patient_address,
-            pharmacist,
-            prescription.directions,
-            prescription.quantity,
-            prescription.date,
+            patient_address,
+            pharmacists,
+            directions,
+            quantity,
+            date,
             drug.name,
             drug.strength,
             drug.formulation,
             isUsed,
-            patientSignature
+            isPatientSigned
         );
     }
 
     function redeem() public returns (bool) {
-        require(
-            isUsed == false &&
-                patientSignature == true &&
-                msg.sender == pharmacist
-        );
+        require(!isUsed
+        && isPatientSigned
+        && pharmacist_address_map[msg.sender]);
+
         isUsed = true;
+        prescriptionRedeemedAt = msg.sender;
         return (isUsed);
     }
 }
-// TODO: Create a function to add a drug to the prescription
