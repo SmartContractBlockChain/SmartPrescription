@@ -81,11 +81,13 @@ def create_app(test_config=None):
         prescriptions = []
 
         for address in prescription_adresses:
-            prescriptions.append((
-                get_contract(w3, contract_interface, address)
+            prescriptions.append(
+                (
+                    get_contract(w3, contract_interface, address)
                     .functions.getPrescription()
-                    .call({'from': user_address})
-            ))
+                    .call({"from": user_address})
+                )
+            )
 
         return jsonify({"success": True, "Prescriptions": prescriptions}), 200
 
@@ -137,12 +139,8 @@ def create_app(test_config=None):
         _contractVariables = [
             request_data["patientAddress"],
             request_data["pharmacistAddress"],
-            request_data["directions"],
-            request_data["quantity"],
             request_data["date"],
-            request_data["drugName"],
-            request_data["drugStrength"],
-            request_data["drugFormulation"],
+            request_data["drugs"],
         ]
         address = deploy_contract(
             w3, contract_interface, from_account, _contractVariables
@@ -169,15 +167,17 @@ def create_app(test_config=None):
     NOTE: check of the variable in the request to use wither patient_address or pharmacist_address
     """
 
-    @app.route("/redeem/<string:address><string:name><string:surname>", methods=["POST"])
+    @app.route(
+        "/redeem/<string:address><string:name><string:surname>", methods=["POST"]
+    )
     def redeem_prescription(address, name, surname):
         # retrive this from db
         pharmacist_address = None
         request_data = request.get_json()
         tx_hash = (
             get_contract(w3, contract_interface, address)
-                .functions.redeem()
-                .transact({"from": request_data["pharmacistAddress"]})
+            .functions.redeem()
+            .transact({"from": request_data["pharmacistAddress"]})
         )
         # TODO: check status and return different if transaction is False
         status = w3.eth.getTransactionReceipt(tx_hash)["status"]
@@ -202,8 +202,8 @@ def create_app(test_config=None):
         address = request_data["contractAddress"]
         tx_hash = (
             get_contract(w3, contract_interface, address)
-                .functions.patientSign()
-                .transact({"from": patient_address})
+            .functions.patientSign()
+            .transact({"from": patient_address})
         )
         status = w3.eth.getTransactionReceipt(tx_hash)["status"]
         return jsonify({"success": True, "patientSigned": status}), 200
@@ -229,5 +229,5 @@ def create_app(test_config=None):
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_app().run()

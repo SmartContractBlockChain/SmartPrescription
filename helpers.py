@@ -22,10 +22,6 @@ def deploy_contract(w3, contract_interface, from_account, contractsVariables):
             contractsVariables[1],
             contractsVariables[2],
             contractsVariables[3],
-            contractsVariables[4],
-            contractsVariables[5],
-            contractsVariables[6],
-            contractsVariables[7],
         )
         .transact({"from": from_account})
     )
