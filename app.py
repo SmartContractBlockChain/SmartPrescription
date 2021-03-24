@@ -2,8 +2,8 @@ from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from web3 import Web3, HTTPProvider
 
-from DataBaseManager import DataBaseManager
-from helpers import compile_source_contract, get_contract, deploy_contract
+from databaseManager import DataBaseManager
+from smartContractUtils import compile_source_contract, get_contract, deploy_contract
 from flask_mysqldb import MySQL
 
 

@@ -95,20 +95,11 @@ contract smartPrescription {
     }
 
     function redeem() public returns (bool) {
-//        require(!isUsed && isPatientSigned);
-
-//        require(!isUsed
-//        && isPatientSigned
-//        && pharmacist_address_map[msg.sender]);
+        require(!isUsed && pharmacist_address_map[msg.sender]);
 
         isUsed = true;
         prescriptionRedeemedAt = msg.sender;
         return (isUsed);
     }
 
-    function shit() public returns (bool){
-        isPatientSigned = true;
-
-        return true;
-    }
 }

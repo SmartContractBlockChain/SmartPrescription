@@ -20,11 +20,11 @@ CREATE TABLE prescriptions (
 );
 
 INSERT INTO users(name,surname,password,userType,blockchainAddress)
- VALUES('Peter','McBurney',SHA1('BlockChainIsAwesome'),'Patient','0x4D79c8fa25f8bA5CF960028e2D17D7cd01d7b23F'),
+ VALUES('Peter','McBurney',SHA1('BlockChainIsAwesome'),'Patient','0xc59fD2c296d4aACfaB4Ae358Ae951Fc340bb3518'),
         ('Abdul','Basit',SHA1('password123'),'Patient','0x280f37D241c4E54b949adD285CE7388af9D422d4'),
         ('Aishik','Ghosh',SHA1('password1234'),'Patient','0xa8bF1D8F84BC30b9417106bfd3ce4a58443538Fd'),
-        ('Aya','Khashoggi',SHA1('password12345'),'Pharmacist','0x9d60DE24D1603B09bF1252235f17AaBAaE2314ee'),
-        ('Kajetan','Dymkiewicz',SHA1('$uper$tr0ngP4$$w00rD'),'Doctor','0xD92abf7FcdB40960667D0390dB33f42281d67864'),
+        ('Aya','Khashoggi',SHA1('password12345'),'Pharmacist','0x4BeF4e9d31138547dA2F23afADcB9626a249Bb96'),
+        ('Kajetan','Dymkiewicz',SHA1('$uper$tr0ngP4$$w00rD'),'Doctor','0xd639852a825a19eD3f1f5C922d2F69dA03B8864d'),
         ('Klaudia','Marciniak',SHA1('Pompom12'),'Doctor','0x961785466649E2f142618d86f9dfCdED227E509E'),
         ('Linfeng','Wang',SHA1('HappyPanda!@#'),'Pharmacist','0x9Ad42ca69eF89897F65b9E27a5B367FbB6c7e3cC'),
         ('Timothee','Heller',SHA1('VivaLaFrance!'),'Doctor','0x92f132ad45AFbF1Db19d37b4FEaB21a7854BbdFF'),
