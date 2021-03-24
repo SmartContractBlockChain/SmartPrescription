@@ -1,19 +1,18 @@
-pragma solidity >=0.7.0;
+pragma experimental ABIEncoderV2;
 
 contract smartPrescription {
-
     struct Drug {
         string name;
         string strength;
         string formulation;
+        string quantity;
+        string directions;
     }
 
-     // address of doctor
+    // address of doctor
     address public creator;
     address patient_address;
-    Drug drug;
-    string directions;
-    string quantity;
+    Drug[3] drugs;
     string date;
 
     //all pharmacist where patient can reedem the prescription
@@ -25,36 +24,34 @@ contract smartPrescription {
     // address of pharmacist where patient can redeemed the prescription
     address prescriptionRedeemedAt;
 
-    mapping (address => bool) private pharmacist_address_map;
+    mapping(address => bool) private pharmacist_address_map;
 
-    function setPharmacists(address[] memory _pharmacists_address) private{
-        for (uint i = 0; i < _pharmacists_address.length; i++) {
-            pharmacist_address_map[_pharmacists_address[i]]=true;
+    function setPharmacists(address[] memory _pharmacists_address) private {
+        for (uint256 i = 0; i < _pharmacists_address.length; i++) {
+            pharmacist_address_map[_pharmacists_address[i]] = true;
         }
     }
 
     constructor(
         address _patient_address,
         address[] memory _pharmacists_address,
-        string memory _directions,
-        string memory _quantity,
         string memory _date,
-        string memory _name,
-        string memory _strength,
-        string memory _formulation
+        Drug[3] memory _drugs
     ) {
         creator = msg.sender;
-        drug = Drug(_name, _strength, _formulation);
+        drugs[0] = _drugs[0];
+        drugs[1] = _drugs[1];
+        drugs[2] = _drugs[2];
         patient_address = _patient_address;
-        directions = _directions;
-        quantity = _quantity;
+
         date = _date;
+        pharmacists = _pharmacists_address;
         setPharmacists(_pharmacists_address);
         isUsed = false;
         isPatientSigned = false;
     }
 
-    function patientSign(address _pharmacist) public returns (bool) {
+    function patientSign() public returns (bool) {
         require(!isPatientSigned && msg.sender == patient_address);
         isPatientSigned = true;
 
@@ -68,35 +65,31 @@ contract smartPrescription {
             address,
             address[] memory,
             string memory,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
+            Drug[3] memory,
             bool,
-            bool) {
-        require(pharmacist_address_map[msg.sender]
-            || msg.sender == patient_address
-            || msg.sender == creator
+            bool
+        )
+    {
+        require(
+            pharmacist_address_map[msg.sender] ||
+                msg.sender == patient_address ||
+                msg.sender == creator
         );
+
         return (
             patient_address,
             pharmacists,
-            directions,
-            quantity,
             date,
-            drug.name,
-            drug.strength,
-            drug.formulation,
+            drugs,
             isUsed,
             isPatientSigned
         );
     }
 
     function redeem() public returns (bool) {
-        require(!isUsed
-        && isPatientSigned
-        && pharmacist_address_map[msg.sender]);
+        require(
+            !isUsed && isPatientSigned && pharmacist_address_map[msg.sender]
+        );
 
         isUsed = true;
         prescriptionRedeemedAt = msg.sender;
