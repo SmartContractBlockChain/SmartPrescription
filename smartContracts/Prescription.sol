@@ -31,6 +31,7 @@ contract smartPrescription {
         for (uint i = 0; i < _pharmacists_address.length; i++) {
             pharmacist_address_map[_pharmacists_address[i]]=true;
         }
+        pharmacists = _pharmacists_address;
     }
 
     constructor(
@@ -94,12 +95,20 @@ contract smartPrescription {
     }
 
     function redeem() public returns (bool) {
-        require(!isUsed
-        && isPatientSigned
-        && pharmacist_address_map[msg.sender]);
+//        require(!isUsed && isPatientSigned);
+
+//        require(!isUsed
+//        && isPatientSigned
+//        && pharmacist_address_map[msg.sender]);
 
         isUsed = true;
         prescriptionRedeemedAt = msg.sender;
         return (isUsed);
+    }
+
+    function shit() public returns (bool){
+        isPatientSigned = true;
+
+        return true;
     }
 }
