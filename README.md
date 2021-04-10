@@ -62,3 +62,13 @@ conda install -c anaconda mysql-connector-python
 python db_integration.py
 ```
 9 go to http://127.0.0.1:5000/ and see if you obtain data from db
+
+10 check if you can obtain data by executing
+ ```
+http://127.0.0.1:5000/prescriptions?name=Kajetan&surname=Dymkiewicz&userType=Doctor
+ ```
+
+11
+ ```
+  curl --header "Content-Type: application/json" --request POST --data '{"directions":"eat it","quantity":"very much","date":"today","drugName":"viagra","drugStrength":"very strong","drugFormulation":"just buy it"}' http://127.0.0.1:5000/prescription\?doctorName\=Kajetan\&doctorSurname\=Dymkiewicz\&patientName\=Peter\&patientSurname\=McBurney
+```

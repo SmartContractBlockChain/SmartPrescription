@@ -1,12 +1,15 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from web3 import Web3, HTTPProvider
-from helpers import compile_source_contract, get_contract, deploy_contract
+
+from databaseManager import DataBaseManager
+from smartContractUtils import compile_source_contract, get_contract, deploy_contract
+from flask_mysqldb import MySQL
 
 
 def create_app(test_config=None):
     # Defining global variables
-    blockchain_address = "HTTP://127.0.0.1:7545"  # Change to local blockchain address
+    blockchain_address = 'http://127.0.0.1:8545'  # Change to local blockchain address
     w3 = Web3(HTTPProvider(blockchain_address))
     contract_source_path = "smartContracts/Prescription.sol"
     contract_interface = compile_source_contract(contract_source_path)
@@ -15,6 +18,15 @@ def create_app(test_config=None):
     app = Flask(__name__)
     # Set up CORS. Allow '*' for origins.
     CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+    # db config
+    app.config['MYSQL_HOST'] = 'localhost'
+    app.config['MYSQL_USER'] = 'SCBC'
+    app.config['MYSQL_PASSWORD'] = 'SCBC_PASS'
+    app.config['MYSQL_DB'] = 'smartPrescription'
+
+    # db manager
+    db_manager = DataBaseManager(MySQL(app))
 
     # after_request decorator to set Access-Control-Allow
     @app.after_request
@@ -27,6 +39,7 @@ def create_app(test_config=None):
         )
         return response
 
+    # TODO verify if this is needed
     """
     GET requests for drugs list.
 
@@ -39,9 +52,9 @@ def create_app(test_config=None):
 
     @app.route("/drugs")
     def get_drugs_list():
+        return jsonify({"success": True, }), 200
 
-        return jsonify({"success": True,}), 200
-
+    # TODO verify if this is needed
     """
     GET requests for drug information.
 
@@ -56,33 +69,46 @@ def create_app(test_config=None):
 
     @app.route("/drugs/<string:drug_name>")
     def get_drug_by_name(drug_name):
-
-        return jsonify({"success": True,}), 200
+        return jsonify({"success": True, }), 200
 
     """
     GET requests for prescription.
+    Required parameters in request: name, surname and userType
+    Example: http://127.0.0.1:5000/prescriptions?name=Kajetan&surname=Dymkiewicz&userType=Doctor
 
-    Retrieve prescription details by the contract transaction hash
+    Retrieve prescriptions and corresponding details by user name and surname
     * patient_address
-    * drug name
+    * list of pharmacists
     * directions
     * quantity
-    * signature  (name and address of prescriber)
-    * date of issue 
-    * isUsed (boolean) 
+    * date
+    * drug name
+    * drug strength
+    * drug formulation
+    * isUsed
+    * isPatientSigned  
     
     Authorized users (Doctor, Pharmacist and Patient)
     """
 
-    @app.route("/prescription/<string:address>")
-    def get_prescription(address):
-        prescription = (
-            get_contract(w3, contract_interface, address)
-            .functions.getPrescription()
-            .call()  # .call({'from':web3.eth.accounts[1]}) to select the wallet from which to call the function
-        )
-        return jsonify({"success": True, "Prescription": prescription}), 200
+    @app.route("/prescriptions")
+    def get_prescriptions():
+        name = request.args.get('name')
+        surname = request.args.get('surname')
+        user_type = request.args.get('userType')
 
+        user_address = db_manager.get_user_address(name, surname, user_type)
+        prescription_addresses = db_manager.get_prescriptions_by_type(name, surname, user_type)
+
+        prescriptions = {}
+        for address in prescription_addresses:
+            prescriptions[address] = get_contract(w3, contract_interface, address) \
+                .functions.getPrescription() \
+                .call({'from': user_address})
+
+        return jsonify({"success": True, "Prescriptions": prescriptions}), 200
+
+    # TODO verify if this is needed
     """
     GET requests for prescriber infromation.
 
@@ -103,8 +129,15 @@ def create_app(test_config=None):
     """
     POST requests for creating prescription.
 
-    * creator eth address 
+    Required parameters in request: doctorName, doctorSurname, patientName and patientSurname
 
+    Required parameters in body: directions, quantity, date, drugName, drugStrength, drugFormulation
+    
+    Example: curl --header "Content-Type: application/json" --request POST --data '{"directions":"eat it",
+    "quantity":"very much","date":"today","drugName":"viagra","drugStrength":"very strong","drugFormulation":"just 
+    buy it"}' http://127.0.0.1:5000/prescription\?doctorName\=Kajetan\&doctorSurname\=Dymkiewicz\&patientName\=Peter
+    \&patientSurname\=McBurney 
+    
     create prescription
     * patient_address
     * directions
@@ -122,10 +155,21 @@ def create_app(test_config=None):
     @app.route("/prescription", methods=["POST"])
     def create_prescription():
         request_data = request.get_json()
-        from_account = request_data["creatorAddress"]
+        doctor_name = request.args.get('doctorName')
+        doctor_surname = request.args.get('doctorSurname')
+
+        doctor_account = db_manager.get_user_address(doctor_name, doctor_surname, 'Doctor')
+
+        patient_name = request.args.get('patientName')
+        patient_surname = request.args.get('patientSurname')
+
+        patient_account = db_manager.get_user_address(patient_name, patient_surname, 'Patient')
+
+        pharmacists_addresses = db_manager.get_all_pharmacists_addresses()
+
         _contractVariables = [
-            request_data["patientAddress"],
-            request_data["pharmacistAddress"],
+            patient_account,
+            pharmacists_addresses,
             request_data["directions"],
             request_data["quantity"],
             request_data["date"],
@@ -133,21 +177,23 @@ def create_app(test_config=None):
             request_data["drugStrength"],
             request_data["drugFormulation"],
         ]
-        address = deploy_contract(
-            w3, contract_interface, from_account, _contractVariables
+        prescription_address = deploy_contract(
+            w3, contract_interface, doctor_account, _contractVariables
         )
-        return (
-            jsonify(
-                {"success": True, "contractAddress": address, "creator": from_account}
-            ),
-            200,
-        )
+
+        db_manager.save_prescription(prescription_address, doctor_account, patient_account)
+
+        return jsonify({"success": True, }), 200
 
     """
     POST requests for redeem prescription.
+    
+    Required parameters in request: name, surname and prescription_address
+    
+    Example: curl --request POST http://127.0.0.1:5000/redeem\?name\=Aya\&surname\=Khashoggi\&
+    prescription_address\=0x43674E64Cc33183A9E4cDBDCaDAf19bDE5EACF90
 
     Redeem prescription
-    * patient_address
     * setPharmacist
     * check isUsed
         - if true --> reject the request
@@ -155,20 +201,26 @@ def create_app(test_config=None):
         
     Authorized users (Pharmacist)
 
-    NOTE: check of the variable in the request to use wither patient_address or pharmacist_address
     """
 
-    @app.route("/redeem/<string:address>", methods=["POST"])
-    def redeem_prescription(address):
-        request_data = request.get_json()
+    @app.route("/redeem", methods=["POST"])
+    def redeem_prescription():
+        pharmacist_name = request.args.get('name')
+        pharmacist_surname = request.args.get('surname')
+
+        pharmacist_address = db_manager.get_user_address(pharmacist_name, pharmacist_surname, 'Pharmacist')
+        prescription_address = request.args.get('prescription_address')
+
         tx_hash = (
-            get_contract(w3, contract_interface, address)
-            .functions.redeem()
-            .transact({"from": request_data["pharmacistAddress"]})
+            get_contract(w3, contract_interface, prescription_address)
+                .functions.redeem()
+                .transact({"from": pharmacist_address})
         )
-        status = w3.eth.getTransactionReceipt(tx_hash)[
-            "status"
-        ]  # TODO: check status and return different if transaction is False
+        # TODO: check status and return different if transaction is False
+        status = w3.eth.getTransactionReceipt(tx_hash)["status"]
+
+        db_manager.set_pharmacist_in_contract(pharmacist_address, prescription_address)
+
         return jsonify({"success": True, "PrescriptionUsed": status}), 200
 
     """
@@ -190,8 +242,8 @@ def create_app(test_config=None):
         address = request_data["contractAddress"]
         tx_hash = (
             get_contract(w3, contract_interface, address)
-            .functions.patientSign()
-            .transact({"from": patient_address})
+                .functions.patientSign()
+                .transact({"from": patient_address})
         )
         status = w3.eth.getTransactionReceipt(tx_hash)["status"]
         return jsonify({"success": True, "patientSigned": status}), 200
@@ -215,3 +267,7 @@ def create_app(test_config=None):
         return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
 
     return app
+
+
+if __name__ == '__main__':
+    create_app().run(debug=True)
